@@ -106,6 +106,8 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias gitui="gitui -t catppuccin-frappe.ron"
+alias kubectl="minikube kubectl --"
+
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 export PATH=$PATH:/opt/nvim-linux64/bin
