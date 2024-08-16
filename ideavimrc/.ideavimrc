@@ -1,38 +1,63 @@
-" .ideavimrc is a configuration file for IdeaVim plugin. It uses
-"   the same commands as the original .vimrc configuration.
-" You can find a list of commands here: https://jb.gg/h38q75
-" Find more examples here: https://jb.gg/share-ideavimrc
-
 let mapleader=" "
-set number relativenumber
-set NERDTree
+
 set easymotion
-
-"" -- Suggested options --
-" Show a few lines of context around the cursor. Note that this makes the
-" text scroll if you mouse-click near the start or end of the window.
-set scrolloff=5
-
-" Do incremental searching.
+set relativenumber
+set clipboard+=unnamed
+set scrolloff=10
+set showmode
+set showcmd
+set ignorecase
+set visualbell
+set smartcase
 set incsearch
-
-" Don't use Ex mode, use Q for formatting.
-map Q gq
-
-" --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
-
-" Highlight copied text
-Plug 'machakann/vim-highlightedyank'
-" Commentary plugin
-Plug 'tpope/vim-commentary'
+set hlsearch
+set nerdtree
 
 
-"" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
-"" Map \r to the Reformat Code action
-"map \r <Action>(ReformatCode)
+inoremap jk <Esc>
 
-"" Map <leader>d to start debug
-"map <leader>d <Action>(Debug)
 
-"" Map \b to toggle the breakpoint on the current line
-"map \b <Action>(ToggleLineBreakpoint)
+" Open NERDTree (use q to exit)
+map <leader>e :NERDTreeToggle<CR>
+" Comment lines
+map <leader>cl <action>(CommentByLineComment)
+map <leader>rn <Action>(RenameElement)
+map <leader>se <action>(SearchEverywhere)
+map <leader>q <action>(CloseContent)
+
+
+" Go to code
+nmap <leader>gd <Action>(GotoDeclaration)
+nmap <leader>gy <Action>(GotoTypeDeclaration)
+nmap <leader>gi <Action>(GotoImplementation)
+nmap <leader>gu <Action>(ShowUsages)
+nmap <leader>gt <Action>(GotoTest)
+nmap <leader>gb <Action>(Back)
+nmap <leader>gf <Action>(Forward)
+
+" Tabs
+map <A-w> <Action>(CloseContent)
+map <A-l> <Action>(NextTab)
+map <A-h> <Action>(PreviousTab)
+imap <A-l> <Esc><Action>(NextTab)i
+imap <A-h> <Esc><Action>(PreviousTab)i
+map <A-w> <Action>(CloseContent)
+imap <A-w> <Esc><Action>(CloseContent)i
+" Code navigation
+nmap [[ <Action>(MethodUp)
+nmap ]] <Action>(MethodDown)
+nmap ]e <Action>(GotoNextError)
+
+" Tabbing
+nnoremap <Tab> >>_
+nnoremap <S-Tab> <<_
+inoremap <S-Tab> <C-D>
+vnoremap <Tab> >gv
+vnoremap <S-Tab> <gv
+
+" Hover
+map <leader>hd <action>(QuickJavaDoc)
+map <leader>he <action>(ShowErrorDescription)
+
+" Search
+nnoremap <esc> :noh<return><esc>
