@@ -2,7 +2,7 @@ let mapleader=" "
 
 set easymotion
 set relativenumber
-set clipboard+=unnamed
+"set clipboard+=unnamed
 set scrolloff=10
 set showmode
 set showcmd
@@ -30,6 +30,7 @@ map <leader>q <action>(CloseContent)
 nmap <leader>gd <Action>(GotoDeclaration)
 nmap <leader>gy <Action>(GotoTypeDeclaration)
 nmap <leader>gi <Action>(GotoImplementation)
+nmap <leader>gq <Action>(GoToQuickDImplementations)
 nmap <leader>gu <Action>(ShowUsages)
 nmap <leader>gt <Action>(GotoTest)
 nmap <leader>gb <Action>(Back)
