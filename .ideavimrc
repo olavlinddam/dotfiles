@@ -1,3 +1,4 @@
+
 let mapleader=" "
 set easymotion
 set relativenumber
@@ -20,6 +21,7 @@ set ttimeoutlen=10    " Reduce timeout length for key codes
 
 " Basic mappings
 inoremap jk <Esc>
+
 " Clear search highlighting with ESC
 nnoremap <esc> :noh<return><esc>
 
@@ -51,7 +53,7 @@ map <leader>q <action>(CloseContent)
 nmap <leader>gd <Action>(GotoDeclaration)
 nmap <leader>gy <Action>(GotoTypeDeclaration)
 nmap <leader>gi <Action>(GotoImplementation)
-nmap <leader>gq <Action>(GoToQuickDImplementations)
+nmap <leader>gq <Action>(GoToQuickImplementations)
 nmap <leader>gu <Action>(ShowUsages)
 nmap <leader>gt <Action>(GotoTest)
 nmap <leader>gb <Action>(Back)
@@ -82,3 +84,7 @@ vnoremap <S-Tab> <gv
 " Documentation and errors
 map <leader>hd <action>(QuickJavaDoc)
 map <leader>he <action>(ShowErrorDescription)
+
+" Navigation
+nnoremap H ^
+nnoremap L $

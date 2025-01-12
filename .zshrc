@@ -73,6 +73,7 @@ ZSH_THEME="robbyrussell"
 plugins=(
 git
 zsh-autosuggestions
+docker
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -86,13 +87,13 @@ source $ZSH/oh-my-zsh.sh
 
 # Preferred editor for local and remote sessions
  if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
+   export EDITOR='vim'
  else
-   export EDITOR='mvim'
+   export EDITOR='nvim'
  fi
 
 # Compilation flags
-# export ARCHFLAGS="-arch x86_64"
+# export ARCHFLAGS="-arch $(uname -m)"
 
 # Set personal aliases, overriding those provided by Oh My Zsh libs,
 # plugins, and themes. Aliases can be placed here, though Oh My Zsh
@@ -105,11 +106,8 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias gitui="gitui -t catppuccin-frappe.ron"
-alias kubectl="minikube kubectl --"
+#
 
-source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+export PATH="$PATH:/home/olav/.dotnet/tools"
 
-export PATH=$PATH:/opt/nvim-linux64/bin
-
-eval "$(starship init zsh)"

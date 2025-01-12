@@ -6,6 +6,10 @@ local function map(mode, lhs, rhs, opts)
     vim.keymap.set(mode, lhs, rhs, options)
 end
 
+-- Line navigation
+vim.keymap.set('n', 'j', 'gj')
+vim.keymap.set('n', 'k', 'gk')
+
 -- Yank and pase
 vim.keymap.set('n', '<leader>y', '"+y', { noremap = true, desc = 'Yank to system clipboard' })
 vim.keymap.set('v', '<leader>y', '"+y', { noremap = true, desc = 'Yank selection to system clipboard' })
