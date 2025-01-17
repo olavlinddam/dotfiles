@@ -6,18 +6,22 @@ local function map(mode, lhs, rhs, opts)
     vim.keymap.set(mode, lhs, rhs, options)
 end
 
+-- Basic mappings
+map('i', 'jk', '<Esc>', { desc = 'Exit insert mode' })
+map('n', '<Esc>', ':noh<CR><Esc>', { desc = 'Clear search highlighting' })
+
 -- Line navigation
-vim.keymap.set('n', 'j', 'gj')
-vim.keymap.set('n', 'k', 'gk')
+map('n', 'j', 'gj', { desc = 'Move down by visual line' })
+map('n', 'k', 'gk', { desc = 'Move up by visual line' })
+map('n', 'H', '^', { desc = 'Go to start of line' })
+map('n', 'L', '$', { desc = 'Go to end of line' })
 
--- Yank and pase
-vim.keymap.set('n', '<leader>y', '"+y', { noremap = true, desc = 'Yank to system clipboard' })
-vim.keymap.set('v', '<leader>y', '"+y', { noremap = true, desc = 'Yank selection to system clipboard' })
-vim.keymap.set('n', '<leader>yy', '"+Y', { noremap = true, desc = 'Yank line to system clipboard' })
-
-vim.keymap.set('n', '<leader>p', '"+p', { noremap = true, desc = 'Paste from system clipboard' })
-vim.keymap.set('n', '<leader>P', '"+P', { noremap = true, desc = 'Paste from system clipboard before cursor' })
-
+-- System clipboard integration
+map('n', '<leader>y', '"+y', { desc = 'Yank to system clipboard' })
+map('v', '<leader>y', '"+y', { desc = 'Yank selection to system clipboard' })
+map('n', '<leader>Y', '"+Y', { desc = 'Yank line to system clipboard' })
+map('n', '<leader>p', '"+p', { desc = 'Paste from system clipboard' })
+map('n', '<leader>P', '"+P', { desc = 'Paste from system clipboard before cursor' })
 
 -- Write and quit
 map('n', '<leader>ww', ':w<CR>', { desc = 'Write buffer' })
@@ -26,6 +30,7 @@ map('n', '<leader>qq', ':q<CR>', { desc = 'Quit' })
 map('n', '<leader>wa', ':wa<CR>', { desc = 'Write all buffers' })
 map('n', '<leader>QQ', ':q!<CR>', { desc = 'Force quit' })
 map('n', '<leader>qa', ':qa<CR>', { desc = 'Quit all' })
+map('n', '<leader>QA', ':qa!<CR>', { desc = 'Quit all' })
 
 -- Telescope keymaps (lazy loaded)
 vim.api.nvim_create_autocmd("User", {
@@ -51,7 +56,7 @@ map('n', '<leader>sv', ':vsplit<CR>', { desc = 'Split vertical' })
 map('n', '<leader>sh', ':split<CR>', { desc = 'Split horizontal' })
 map('n', '<leader>sc', ':close<CR>', { desc = 'Split close' })
 
--- Window navigation (optional, but recommended)
+-- Window navigation
 map('n', '<C-h>', '<C-w>h', { desc = 'Navigate to left window' })
 map('n', '<C-j>', '<C-w>j', { desc = 'Navigate to window below' })
 map('n', '<C-k>', '<C-w>k', { desc = 'Navigate to window above' })
@@ -63,26 +68,34 @@ map('n', '<C-Down>', ':resize -2<CR>', { desc = 'Decrease window height' })
 map('n', '<C-Left>', ':vertical resize -2<CR>', { desc = 'Decrease window width' })
 map('n', '<C-Right>', ':vertical resize +2<CR>', { desc = 'Increase window width' })
 
-
 -- Code Navigation
 map('n', 'gd', vim.lsp.buf.definition, { desc = 'Go to definition' })
 map('n', 'gr', vim.lsp.buf.references, { desc = 'Go to references' })
 map('n', 'gi', vim.lsp.buf.implementation, { desc = 'Go to implementation' })
 map('n', 'gD', vim.lsp.buf.declaration, { desc = 'Go to declaration' })
 map('n', 'gt', vim.lsp.buf.type_definition, { desc = 'Go to type definition' })
+map('n', 'gb', '<C-o>', { desc = 'Go back' })
+map('n', 'gf', '<C-i>', { desc = 'Go forward' })
 
--- Documentation
-map('n', 'K', vim.lsp.buf.hover, { desc = 'Show hover documentation' })
-map('n', '<leader>k', vim.lsp.buf.signature_help, { desc = 'Show signature help' })
+-- Documentation and errors
+map('n', '<leader>hd', vim.lsp.buf.hover, { desc = 'Show documentation' })
+map('n', '<leader>he', vim.diagnostic.open_float, { desc = 'Show error description' })
 
--- Error navigation and diagnostics
-map('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic' })
-map('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic' })
-map('n', '<leader>he', vim.diagnostic.open_float, { desc = 'Show diagnostic error messages' })
-map('n', '<leader>hq', vim.diagnostic.setloclist, { desc = 'Open diagnostic quickfix list' })
+-- Error navigation
+map('n', '<leader>ne', vim.diagnostic.goto_next, { desc = 'Go to next error' })
+map('n', '<leader>pe', vim.diagnostic.goto_prev, { desc = 'Go to previous error' })map('n', '<leader>hq', vim.diagnostic.setloclist, { desc = 'Open diagnostic quickfix list' })
 
 -- Code actions
 map('n', '<leader>rn', vim.lsp.buf.rename, { desc = 'Rename symbol' })
 map('n', '<leader>ca', vim.lsp.buf.code_action, { desc = 'Code actions' })
-map('n', '<leader>f', vim.lsp.buf.format, { desc = 'Format code' })
-map('n', '<leader>qf', vim.lsp.buf.code_action, { desc = 'Show code actions' })
+map('n', '<leader>fd', vim.lsp.buf.format, { desc = 'Format code' })
+map('n', '<leader>fi', vim.lsp.buf.format, { desc = 'Format and organize imports' })
+
+-- Indentation
+map('n', '<Tab>', '>>_', { desc = 'Indent line' })
+map('n', '<S-Tab>', '<<_', { desc = 'Unindent line' })
+map('i', '<S-Tab>', '<C-D>', { desc = 'Unindent in insert mode' })
+map('v', '<Tab>', '>gv', { desc = 'Indent selection' })
+map('v', '<S-Tab>', '<gv', { desc = 'Unindent selection' })
+
+-- Method navigation

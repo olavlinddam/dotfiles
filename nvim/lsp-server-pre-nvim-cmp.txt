@@ -1,3 +1,4 @@
+
 return {
     -- Mason for managing LSP servers
     {
@@ -46,8 +47,7 @@ return {
                         dotnet_enable_inlay_hints_for_parameters = true,
                         dotnet_suppress_inlay_hints_for_parameters_that_differ_only_by_suffix = true,
                         dotnet_suppress_inlay_hints_for_parameters_that_match_argument_name = true,
-                        dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,                    
-                    },
+                        dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,                    },
                 },
             },
             filewatching = true,
@@ -76,3 +76,4 @@ return {
         end
     },
 }
+
