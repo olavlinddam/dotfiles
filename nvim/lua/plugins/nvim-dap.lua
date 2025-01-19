@@ -8,7 +8,7 @@ return {
             if uname == "Linux" then
                 dap.adapters.coreclr = {
                     type = "executable",
-                    command = "/usr/bin/netcoredbg",
+                    command = "/usr/local/netcoredbg",
                     args = { "--interpreter=vscode" },
                 }
                 dap.configurations.cs = {
