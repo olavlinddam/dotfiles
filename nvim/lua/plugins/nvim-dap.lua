@@ -1,39 +1,86 @@
 return {
     {
-        "mfussenegger/nvim-dap",  -- Main debugging plugin
+        "mfussenegger/nvim-dap",
         config = function()
-            local dap = require("dap")  -- Get the debug adapter protocol module
-            
-            -- Detect operating system for OS-specific configurations
+            local dap = require("dap")
             local uname = vim.loop.os_uname().sysname
 
             if uname == "Linux" then
-                -- Setup for Linux
-                dap.adapters.coreclr = {  -- Configure the C# debugger adapter
-                    type = "executable",   -- Run as an executable program
-                    command = "/usr/bin/netcoredbg",  -- Path to the debugger
-                    args = { "--interpreter=vscode" }, -- Use VSCode debug protocol
+                dap.adapters.coreclr = {
+                    type = "executable",
+                    command = "/usr/bin/netcoredbg",
+                    args = { "--interpreter=vscode" },
                 }
-                dap.configurations.cs = {  -- Configuration for C# debugging
+                dap.configurations.cs = {
                     {
-                        type = "coreclr",  -- Use the coreclr adapter defined above
-                        name = "launch - netcoredbg",  -- Name shown in debugger
-                        request = "launch", -- Start new process (vs 'attach')
+                        type = "coreclr",
+                        name = "launch - netcoredbg (console)",
+                        request = "launch",
                         program = function()
-                            -- Prompt for dll path with default value
                             return vim.fn.input(
                                 "Path to dll",
-                                vim.fn.getcwd()  -- Start from current directory
-                                    .. "/ProjectRiskManagementSim.ProjectSimulator/bin/Debug/net8.0/ProjectRiskManagementSim.ProjectSimulator.dll",
+                                vim.fn.getcwd() .. "/bin/Debug/net8.0/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ".dll",
                                 "file"
                             )
                         end,
                     },
+                    {
+                        type = "coreclr",
+                        name = "launch - netcoredbg (web)",
+                        request = "launch",
+                        program = function()
+                            return vim.fn.input(
+                                "Path to dll",
+                                vim.fn.getcwd() .. "/bin/Debug/net8.0/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ".dll",
+                                "file"
+                            )
+                        end,
+                        env = {
+                            ASPNETCORE_ENVIRONMENT = "Development",
+                            ASPNETCORE_URLS = "http://localhost:5000"
+                        },
+                        cwd = "${workspaceFolder}",
+                    }
                 }
-            elseif uname == "Darwin" then -- macOS configuration (empty for now)
-            -- Nothing defined
+            elseif uname == "Darwin" then
+                -- macOS configuration (similar to Linux)
+                dap.adapters.coreclr = {
+                    type = "executable",
+                    command = "/usr/local/netcoredbg",
+                    args = { "--interpreter=vscode" },
+                }
+                dap.configurations.cs = {
+                    {
+                        type = "coreclr",
+                        name = "launch - netcoredbg (console)",
+                        request = "launch",
+                        program = function()
+                            return vim.fn.input(
+                                "Path to dll",
+                                vim.fn.getcwd() .. "/bin/Debug/net8.0/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ".dll",
+                                "file"
+                            )
+                        end,
+                    },
+                    {
+                        type = "coreclr",
+                        name = "launch - netcoredbg (web)",
+                        request = "launch",
+                        program = function()
+                            return vim.fn.input(
+                                "Path to dll",
+                                vim.fn.getcwd() .. "/bin/Debug/net8.0/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ".dll",
+                                "file"
+                            )
+                        end,
+                        env = {
+                            ASPNETCORE_ENVIRONMENT = "Development",
+                            ASPNETCORE_URLS = "http://localhost:5000"
+                        },
+                        cwd = "${workspaceFolder}",
+                    }
+                }
             elseif uname == "Windows_NT" then
-                -- Windows configuration (similar to Linux but with Windows paths)
                 dap.adapters.coreclr = {
                     type = "executable",
                     command = "C:\\Users\\marni\\scoop\\shims\\netcoredbg",
@@ -42,84 +89,80 @@ return {
                 dap.configurations.cs = {
                     {
                         type = "coreclr",
-                        name = "launch - netcoredbg",
+                        name = "launch - netcoredbg (console)",
                         request = "launch",
                         program = function()
                             return vim.fn.input(
                                 "Path to dll",
-                                vim.fn.getcwd()
-                                    .. "\\ProjectRiskManagementSim.ProjectSimulator\\bin\\Debug\\net8.0\\ProjectRiskManagementSim.ProjectSimulator.dll",
+                                vim.fn.getcwd() .. "\\bin\\Debug\\net8.0\\" .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ".dll",
                                 "file"
                             )
                         end,
                     },
+                    {
+                        type = "coreclr",
+                        name = "launch - netcoredbg (web)",
+                        request = "launch",
+                        program = function()
+                            return vim.fn.input(
+                                "Path to dll",
+                                vim.fn.getcwd() .. "\\bin\\Debug\\net8.0\\" .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ".dll",
+                                "file"
+                            )
+                        end,
+                        env = {
+                            ASPNETCORE_ENVIRONMENT = "Development",
+                            ASPNETCORE_URLS = "http://localhost:5000"
+                        },
+                        cwd = "${workspaceFolder}",
+                    }
                 }
             else
-                print("Unsupported operating system.")
+                print("Unsupported operating system")
                 return
             end
-        end,
+        end
     },
     {
-        "rcarriga/nvim-dap-ui",  -- UI plugin for nvim-dap
-        -- Required dependencies
+        "rcarriga/nvim-dap-ui",
         dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
         config = function()
-            -- Get both dap and dapui modules
             local dap, dapui = require("dap"), require("dapui")
 
             dapui.setup({
-                -- Configure UI icons for expanded/collapsed sections
                 icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
-                
-                -- Define key mappings for the UI
                 mappings = {
-                    expand = { "<CR>", "<2-LeftMouse>" },  -- Expand section
-                    open = "o",    -- Open item
-                    remove = "d",  -- Remove item
-                    edit = "e",    -- Edit item
-                    repl = "r",    -- Open REPL
-                    toggle = "t",  -- Toggle item
+                    expand = { "<CR>", "<2-LeftMouse>" },
+                    open = "o",
+                    remove = "d",
+                    edit = "e",
+                    repl = "r",
+                    toggle = "t",
                 },
-
-                -- Optional element-specific mapping overrides
-                element_mappings = {
-                    -- Example:
-                    -- stacks = {
-                    --   open = "<CR>",
-                    --   expand = "o",
-                    -- }
-                },
-
-                -- Enable line expansion if Neovim >= 0.7
                 expand_lines = vim.fn.has("nvim-0.7") == 1,
-
-                -- Define UI layout
                 layouts = {
-                    {   -- Left sidebar layout
+                    {
                         elements = {
-                            { id = "scopes", size = 0.25 },  -- Variable scope viewer
-                            "breakpoints",  -- Breakpoint list
-                            "stacks",      -- Call stack
-                            "watches",     -- Watch expressions
+                            { id = "scopes", size = 0.25 },
+                            "breakpoints",
+                            "stacks",
+                            "watches",
                         },
-                        size = 40,         -- Width in columns
-                        position = "left", -- Position on screen
+                        size = 40,
+                        position = "left",
                     },
-                    {   -- Bottom panel layout
+                    {
                         elements = {
-                            "repl",     -- Interactive REPL
-                            "console",  -- Debug console
+                            "repl",
+                            "console",
                         },
-                        size = 0.25,     -- Height (25% of window)
+                        size = 0.25,
                         position = "bottom",
                     },
                 },
-
-                -- Debug control buttons configuration
                 controls = {
                     enabled = true,
-                    element = "repl",  -- Show in REPL window
+                    element = "repl",
                     icons = {
                         pause = "",
                         play = "",
@@ -131,33 +174,28 @@ return {
                         terminate = "□",
                     },
                 },
-
-                -- Floating window configuration
                 floating = {
-                    max_height = nil,     -- Can be number or nil
-                    max_width = nil,      -- Can be number or nil
-                    border = "single",    -- Window border style
+                    max_height = nil,
+                    max_width = nil,
+                    border = "single",
                     mappings = {
-                        close = { "q", "<Esc>" },  -- Close window mappings
+                        close = { "q", "<Esc>" },
                     },
                 },
-
-                windows = { indent = 1 },  -- Indentation in windows
+                windows = { indent = 1 },
                 render = {
-                    max_type_length = nil,    -- Max length for type strings
-                    max_value_lines = 100,    -- Max lines for values
+                    max_type_length = nil,
+                    max_value_lines = 100,
                 },
             })
 
-            -- Auto-open UI when debugging starts
+            -- Auto open/close dap UI
             dap.listeners.after.event_initialized["dapui_config"] = function()
                 dapui.open()
             end
-            -- Auto-close UI when debugging terminates
             dap.listeners.before.event_terminated["dapui_config"] = function()
                 dapui.close()
             end
-            -- Auto-close UI when debugging exits
             dap.listeners.before.event_exited["dapui_config"] = function()
                 dapui.close()
             end

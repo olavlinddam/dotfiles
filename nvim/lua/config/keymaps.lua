@@ -98,4 +98,15 @@ map('i', '<S-Tab>', '<C-D>', { desc = 'Unindent in insert mode' })
 map('v', '<Tab>', '>gv', { desc = 'Indent selection' })
 map('v', '<S-Tab>', '<gv', { desc = 'Unindent selection' })
 
+--- Debugging
+map('n', '<F5>', function() require('dap').continue() end, { desc = 'Start/Continue debugging' })
+map('n', '<F10>', function() require('dap').step_over() end, { desc = 'Step over' })
+map('n', '<F11>', function() require('dap').step_into() end, { desc = 'Step into' })
+map('n', '<F12>', function() require('dap').step_out() end, { desc = 'Step out' })
+map('n', '<leader>db', function() require('dap').toggle_breakpoint() end, { desc = 'Toggle breakpoint' })
+map('n', '<leader>dB', function() require('dap').set_breakpoint(vim.fn.input('Breakpoint condition: ')) end, { desc = 'Set conditional breakpoint' })
+map('n', '<leader>dr', function() require('dap').repl.open() end, { desc = 'Open debug REPL' })
+map('n', '<leader>dl', function() require('dap').run_last() end, { desc = 'Run last debug configuration' })
+
+
 -- Method navigation
