@@ -5,83 +5,79 @@ return {
             local dap = require("dap")
             local uname = vim.loop.os_uname().sysname
 
-            -- Function to read and parse .dap-config.json
-            local function load_dap_config()
-                local config_path = vim.fn.getcwd() .. "/dap-config.json"
-                if vim.fn.filereadable(config_path) == 1 then
-                    local content = vim.fn.readfile(config_path)
-                    local json_str = table.concat(content, "\n")
-                    local ok, config = pcall(vim.json.decode, json_str)
-                    if ok then
-                        return config
-                    else
-                        print("Error parsing .dap-config.json")
-                    end
-                else
-                    print("Warning: .dap-config.json not found")
-                end
-                return {}
-            end
-
-            -- Function to read and parse .env file
-            local function load_env_file(env_path)
-                if vim.fn.filereadable(env_path) == 1 then
-                    local content = vim.fn.readfile(env_path)
-                    local env_vars = {}
-                    for _, line in ipairs(content) do
-                        local key, value = line:match("^(.-)=(.*)$")
-                        if key and value then
-                            env_vars[key] = value
+            -- Function to read and parse launchSettings.json
+            local function get_launch_settings()
+                local function find_launch_settings()
+                    -- Common paths to look for launchSettings.json
+                    local possible_paths = {
+                        "Properties/launchSettings.json",
+                        "../Properties/launchSettings.json",
+                        "../../Properties/launchSettings.json",
+                    }
+                    
+                    for _, path in ipairs(possible_paths) do
+                        local full_path = vim.fn.getcwd() .. "/" .. path
+                        if vim.fn.filereadable(full_path) == 1 then
+                            return full_path
                         end
                     end
-                    return env_vars
+                    return nil
+                end
+
+                local settings_path = find_launch_settings()
+                if not settings_path then
+                    print("Warning: launchSettings.json not found")
+                    return {
+                        ASPNETCORE_ENVIRONMENT = "Development",
+                        ASPNETCORE_URLS = "http://localhost:5000"
+                    }
+                end
+
+                local content = vim.fn.readfile(settings_path)
+                local json_str = table.concat(content, "\n")
+                local ok, settings = pcall(vim.json.decode, json_str)
+                
+                if not ok then
+                    print("Error parsing launchSettings.json")
+                    return {
+                        ASPNETCORE_ENVIRONMENT = "Development",
+                        ASPNETCORE_URLS = "http://localhost:5000"
+                    }
+                end
+
+                -- Get environment variables from the "http" profile
+                local env_vars = settings.profiles.http.environmentVariables or {}
+                
+                -- Always ensure these basic variables are set
+                env_vars.ASPNETCORE_ENVIRONMENT = env_vars.ASPNETCORE_ENVIRONMENT or "Development"
+                env_vars.ASPNETCORE_URLS = env_vars.ASPNETCORE_URLS or "http://localhost:5000"
+
+                return env_vars
+            end
+
+            -- Get the platform-specific netcoredbg path
+            local function get_debugger_path()
+                if uname == "Windows_NT" then
+                    return "C:\\Users\\marni\\scoop\\shims\\netcoredbg"
+                elseif uname == "Linux" or uname == "Darwin" then
+                    return "/usr/local/netcoredbg"
                 else
-                    print("Warning: .env file not found at " .. env_path)
-                    return {}
+                    print("Unsupported operating system")
+                    return nil
                 end
             end
 
-            -- Function to read and parse launchSettings.json
-            local function get_launch_settings(launch_settings_path)
-                if vim.fn.filereadable(launch_settings_path) == 1 then
-                    local content = vim.fn.readfile(launch_settings_path)
-                    local json_str = table.concat(content, "\n")
-                    local ok, settings = pcall(vim.json.decode, json_str)
-                    if ok then
-                        -- Get environment variables from the "http" profile
-                        local env_vars = settings.profiles.http.environmentVariables or {}
-                        -- Always ensure these basic variables are set
-                        env_vars.ASPNETCORE_ENVIRONMENT = env_vars.ASPNETCORE_ENVIRONMENT or "Development"
-                        env_vars.ASPNETCORE_URLS = env_vars.ASPNETCORE_URLS or "http://localhost:5000"
-                        return env_vars
-                    else
-                        print("Error parsing launchSettings.json")
-                    end
+            -- Get the platform-specific dll path format
+            local function get_dll_path_format()
+                if uname == "Windows_NT" then
+                    return "\\bin\\Debug\\net8.0\\"
                 else
-                    print("Warning: launchSettings.json not found at " .. launch_settings_path)
+                    return "/bin/Debug/net8.0/"
                 end
-                return {
-                    ASPNETCORE_ENVIRONMENT = "Development",
-                    ASPNETCORE_URLS = "http://localhost:5000"
-                }
             end
 
-            -- Load the custom DAP configuration
-            local dap_config = load_dap_config()
-
-            -- Get the platform-specific debugger path
-            local debugger_path = dap_config.debugger_path and dap_config.debugger_path[uname:lower()]
-            if not debugger_path then
-                print("Unsupported operating system or debugger path not configured")
-                return
-            end
-
-            -- Get the platform-specific DLL path format
-            local dll_path_format = dap_config.dll_path_format and dap_config.dll_path_format[uname:lower()]
-            if not dll_path_format then
-                print("Unsupported operating system or DLL path format not configured")
-                return
-            end
+            local debugger_path = get_debugger_path()
+            if not debugger_path then return end
 
             -- Configure the adapter
             dap.adapters.coreclr = {
@@ -99,7 +95,7 @@ return {
                     program = function()
                         return vim.fn.input(
                             "Path to dll",
-                            vim.fn.getcwd() .. dll_path_format .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ".dll",
+                            vim.fn.getcwd() .. get_dll_path_format() .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ".dll",
                             "file"
                         )
                     end,
@@ -111,18 +107,12 @@ return {
                     program = function()
                         return vim.fn.input(
                             "Path to dll",
-                            vim.fn.getcwd() .. dll_path_format .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ".dll",
+                            vim.fn.getcwd() .. get_dll_path_format() .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ".dll",
                             "file"
                         )
                     end,
                     env = function()
-                        local env_vars = get_launch_settings(dap_config.launch_settings)
-                        local env_file_vars = load_env_file(dap_config.env_file)
-                        -- Merge environment variables from .env file with those from launchSettings.json
-                        for k, v in pairs(env_file_vars) do
-                            env_vars[k] = v
-                        end
-                        return env_vars
+                        return get_launch_settings()
                     end,
                     cwd = "${workspaceFolder}",
                 }
@@ -223,3 +213,5 @@ return {
         end
     },
 }
+
+
