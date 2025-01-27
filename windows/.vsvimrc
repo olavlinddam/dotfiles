@@ -1,0 +1,61 @@
+let mapleader = " "
+
+set ignorecase
+set smartcase
+set tabstop=4
+set shiftwidth=4
+set autoindent
+
+
+" CODE NAVIGATION
+nnoremap gr :vsc Edit.GoToReference<cr>
+nnoremap gd :vsc Edit.GoToDefinition<cr>
+nnoremap gi :vsc Edit.GoToImplementation<cr>
+nnoremap gs :vsc Edit.GoToSymbol<cr>
+" go to class member ("outline")
+nnoremap gm :vsc Edit.GoToMember<cr>
+nnoremap pd :vsc Edit.PeekDefinition
+
+" SEARCH
+nnoremap <leader>ff :vsc ReSharper.ReSharper_GoToType<cr>
+
+
+" WINDOW NAVIGATION
+nnoremap <leader>qq :vsc Window.CloseDocumentWindow<cr>
+nnoremap <leader>L :vsc Window.NextSplitPane<cr>
+nnoremap <leader>H :vsc Window.PreviousSplitPane<cr>
+"nnoremap <leader>fe :vsc Window.ActivateDocumentWindow
+nnoremap <leader>fe <C-F6>
+
+" VIEW NAVIGATION
+nnoremap <c-o> :vsc View.NavigateBackward<cr>
+nnoremap <c-i> :vsc View.NavigateForward<cr>
+nnoremap <leader>e :vsc View.SolutionExplorer<cr>
+nnoremap <leader>ca :vsc View.QuickActions<cr>
+nnoremap <leader>'' :vsc View.Terminal<cr>
+
+
+" COMMENTS
+xnoremap <leader>cl :vsc Edit.CommentSelection<cr>
+nnoremap <leader>cl V:vsc Edit.CommentSelection<cr>
+
+" DEBUGGING
+nnoremap <leader>db :vsc Debug.ToggleBreakpoint<cr>
+nnoremap <leader>dc :vsc Debug.Start<cr>
+nnoremap si :vsc Debug.StepInto<cr>
+nnoremap so :vsc Debug.StepOver<cr>
+nnoremap SO :vsc Debug.StepOver<cr>
+nnoremap <leader>ds :vsc Debug.StopDebugging<cr>
+
+" FORMAT
+nnoremap <leader>fd :vsc Edit.FormatDocument<cr>
+
+" TOOLS
+nnoremap <leader>mn :vsc Tools.ManageNuGetPackagesForSolution<cr>
+nnoremap <leader>te :vsc TestExplorer.ShowTestExplorer<cr>
+nnoremap <leader>tr :vsc TestExplorer.RunSelectedTests<cr>
+nnoremap <leader>tp :vsc TestExplorer.RunPassedTests<cr>
+nnoremap <leader>tf :vsc TestExplorer.RunFailedTests<cr>
+nnoremap <leader>ta :vsc TestExplorer.RunAllTests<cr>
+
+nnoremap <leader>af :vsc AddQuickFile<cr>
