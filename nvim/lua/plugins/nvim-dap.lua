@@ -1,246 +1,210 @@
 return {
-	{
-		"mfussenegger/nvim-dap",
-		config = function()
-			local dap = require("dap")
-			local uname = vim.loop.os_uname().sysname
-
-			-- Function to read and parse launchSettings.json
-			local function get_launch_settings()
-				local function find_launch_settings()
-					-- Common paths to look for launchSettings.json
-					local possible_paths = {
-						"Properties/launchSettings.json",
-						"../Properties/launchSettings.json",
-						"../../Properties/launchSettings.json",
-					}
-
-					for _, path in ipairs(possible_paths) do
-						local full_path = vim.fn.getcwd() .. "/" .. path
-						if vim.fn.filereadable(full_path) == 1 then
-							return full_path
-						end
-					end
-					return nil
-				end
-
-				local settings_path = find_launch_settings()
-				if not settings_path then
-					print("Warning: launchSettings.json not found")
-					return {
-						ASPNETCORE_ENVIRONMENT = "Development",
-						ASPNETCORE_URLS = "http://localhost:5000",
-					}
-				end
-
-				local content = vim.fn.readfile(settings_path)
-				local json_str = table.concat(content, "\n")
-				local ok, settings = pcall(vim.json.decode, json_str)
-
-				if not ok then
-					print("Error parsing launchSettings.json")
-					return {
-						ASPNETCORE_ENVIRONMENT = "Development",
-						ASPNETCORE_URLS = "http://localhost:5000",
-					}
-				end
-
-				-- Get environment variables from the "http" profile
-				local env_vars = settings.profiles.http.environmentVariables or {}
-
-				-- Always ensure these basic variables are set
-				env_vars.ASPNETCORE_ENVIRONMENT = env_vars.ASPNETCORE_ENVIRONMENT or "Development"
-				env_vars.ASPNETCORE_URLS = env_vars.ASPNETCORE_URLS or "http://localhost:5000"
-
-				return env_vars
-			end
-
-			-- Get the platform-specific netcoredbg path
-			local function get_debugger_path()
-				if uname == "Windows_NT" then
-					return "C:\\Users\\marni\\scoop\\shims\\netcoredbg"
-				elseif uname == "Linux" or uname == "Darwin" then
-					return "/usr/local/netcoredbg"
-				else
-					print("Unsupported operating system")
-					return nil
-				end
-			end
-
-			-- Get the platform-specific dll path format
-			local function get_dll_path_format()
-				if uname == "Windows_NT" then
-					return "\\bin\\Debug\\net8.0\\"
-				else
-					return "/bin/Debug/net8.0/"
-				end
-			end
-
-			local debugger_path = get_debugger_path()
-			if not debugger_path then
-				return
-			end
-
-			-- Configure the adapter
-			dap.adapters.coreclr = {
-				type = "executable",
-				command = debugger_path,
-				args = { "--interpreter=vscode" },
-			}
-
-			-- Configure launch options
-			dap.configurations.cs = {
-				{
-					type = "coreclr",
-					name = "launch - netcoredbg (console)",
-					request = "launch",
-					program = function()
-						return vim.fn.input(
-							"Path to dll",
-							vim.fn.getcwd()
-								.. get_dll_path_format()
-								.. vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-								.. ".dll",
-							"file"
-						)
-					end,
-				},
-				{
-					type = "coreclr",
-					name = "launch - netcoredbg (web)",
-					request = "launch",
-					program = function()
-						return vim.fn.input(
-							"Path to dll",
-							vim.fn.getcwd()
-								.. get_dll_path_format()
-								.. vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-								.. ".dll",
-							"file"
-						)
-					end,
-					env = function()
-						return get_launch_settings()
-					end,
-					cwd = "${workspaceFolder}",
-				},
-			}
-		end,
-	},
-	{
+	"mfussenegger/nvim-dap",
+	dependencies = {
 		"rcarriga/nvim-dap-ui",
-		dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
-		config = function()
-			local dap, dapui = require("dap"), require("dapui")
-
-			dapui.setup({
-				icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
-				mappings = {
-					expand = { "<CR>", "<2-LeftMouse>" },
-					open = "o",
-					remove = "d",
-					edit = "e",
-					repl = "r",
-					toggle = "t",
-				},
-				expand_lines = vim.fn.has("nvim-0.7") == 1,
-				layouts = {
-					{
-						elements = {
-							{ id = "scopes", size = 0.25 },
-							"breakpoints",
-							"stacks",
-							"watches",
-						},
-						size = 40,
-						position = "left",
-					},
-					{
-						elements = {
-							"repl",
-							"console",
-						},
-						size = 0.25,
-						position = "bottom",
-					},
-				},
-				controls = {
-					enabled = true,
-					element = "repl",
-					icons = {
-						pause = "",
-						play = "",
-						step_into = "",
-						step_over = "",
-						step_out = "",
-						step_back = "",
-						run_last = "↻",
-						terminate = "□",
-					},
-				},
-				floating = {
-					max_height = nil,
-					max_width = nil,
-					border = "single",
-					mappings = {
-						close = { "q", "<Esc>" },
-					},
-				},
-				windows = { indent = 1 },
-				render = {
-					max_type_length = nil,
-					max_value_lines = 100,
-				},
-			})
-
-			-- Auto open/close dap UI
-			dap.listeners.after.event_initialized["dapui_config"] = function()
-				dapui.open()
-			end
-			dap.listeners.before.event_terminated["dapui_config"] = function()
-				dapui.close()
-			end
-			dap.listeners.before.event_exited["dapui_config"] = function()
-				dapui.close()
-			end
-
-			-- Add keymaps for debugging
-			vim.keymap.set("n", "<F5>", function()
-				require("dap").continue()
-			end)
-			vim.keymap.set("n", "<F10>", function()
-				require("dap").step_over()
-			end)
-			vim.keymap.set("n", "<F11>", function()
-				require("dap").step_into()
-			end)
-			vim.keymap.set("n", "<F12>", function()
-				require("dap").step_out()
-			end)
-			vim.keymap.set("n", "<Leader>b", function()
-				require("dap").toggle_breakpoint()
-			end)
-			vim.keymap.set("n", "<Leader>B", function()
-				require("dap").set_breakpoint()
-			end)
-			vim.keymap.set("n", "<Leader>lp", function()
-				require("dap").set_breakpoint(nil, nil, vim.fn.input("Log point message: "))
-			end)
-			vim.keymap.set("n", "<Leader>dr", function()
-				require("dap").repl.open()
-			end)
-			vim.keymap.set("n", "<Leader>dl", function()
-				require("dap").run_last()
-			end)
-			vim.keymap.set("n", "<Leader>dt", function()
-				require("dap").terminate()
-			end)
-
-			-- Dap UI keymaps
-			vim.keymap.set("n", "<Leader>dui", function()
-				require("dapui").toggle()
-			end)
-		end,
+		"nvim-neotest/nvim-nio",
 	},
-}
+	config = function()
+		local dap = require("dap")
+		local dapui = require("dapui")
 
+		-- dap.defaults.fallback.exception_breakpoints = { "raised", "uncaught" }
+
+		dapui.setup({
+			controls = {
+				element = "repl",
+				enabled = true,
+				icons = {
+					disconnect = "",
+					pause = "",
+					play = "",
+					run_last = "",
+					step_back = "",
+					step_into = "",
+					step_out = "",
+					step_over = "",
+					terminate = "",
+				},
+			},
+			element_mappings = {},
+			expand_lines = true,
+			floating = {
+				border = "rounded",
+				mappings = {
+					close = { "q", "<Esc>" },
+				},
+			},
+			force_buffers = true,
+			icons = {
+				collapsed = "",
+				current_frame = "",
+				expanded = "",
+			},
+			layouts = {
+				{
+					elements = {
+						{
+							id = "scopes",
+							size = 0.25,
+						},
+						{
+							id = "breakpoints",
+							size = 0.25,
+						},
+						{
+							id = "stacks",
+							size = 0.25,
+						},
+						{
+							id = "watches",
+							size = 0.25,
+						},
+					},
+					position = "right",
+					size = 50,
+				},
+				{
+					elements = {
+						{
+							id = "repl",
+							size = 0.5,
+						},
+						{
+							id = "console",
+							size = 0.5,
+						},
+					},
+					position = "bottom",
+					size = 10,
+				},
+			},
+			mappings = {
+				edit = "e",
+				expand = { "<CR>", "<2-LeftMouse>" },
+				open = "o",
+				remove = "d",
+				repl = "r",
+				toggle = "t",
+			},
+			render = {
+				indent = 1,
+				max_value_lines = 100,
+			},
+		})
+
+		-- HELPER FUNCTIONS FOR DOTNET
+		-- Get the platform-specific netcoredbg path
+		local function get_debugger_path()
+			if uname == "Windows_NT" then
+				return "C:\\Users\\olav\\scoop\\shims\\netcoredbg"
+			elseif uname == "Linux" or uname == "Darwin" then
+				return "/usr/local/netcoredbg"
+			else
+				print("Unsupported operating system")
+				return nil
+			end
+		end
+
+		local dotnet_build_project = function()
+			local default_path = vim.fn.getcwd() .. "/"
+
+			if vim.g["dotnet_last_proj_path"] ~= nil then
+				default_path = vim.g["dotnet_last_proj_path"]
+			end
+
+			local path = vim.fn.input("Path to your *proj file", default_path, "file")
+
+			vim.g["dotnet_last_proj_path"] = path
+
+			local cmd = "dotnet build -c Debug " .. path .. " > /dev/null"
+
+			print("")
+			print("Cmd to execute: " .. cmd)
+
+			local f = os.execute(cmd)
+
+			if f == 0 then
+				print("\nBuild: ✔️ ")
+			else
+				print("\nBuild: ❌ (code: " .. f .. ")")
+			end
+		end
+
+		local dotnet_get_dll_path = function()
+			local request = function()
+				return vim.fn.input("Path to dll to debug: ", vim.fn.getcwd() .. "/bin/Debug/", "file")
+			end
+
+			if vim.g["dotnet_last_dll_path"] == nil then
+				vim.g["dotnet_last_dll_path"] = request()
+			else
+				if
+					vim.fn.confirm("Change the path to dll?\n" .. vim.g["dotnet_last_dll_path"], "&yes\n&no", 2) == 1
+				then
+					vim.g["dotnet_last_dll_path"] = request()
+				end
+			end
+
+			return vim.g["dotnet_last_dll_path"]
+		end
+
+		dap.adapters.coreclr = {
+			type = "executable",
+			command = "C:\\Users\\olav\\scoop\\shims\\netcoredbg.exe",
+			args = { "--interpreter=vscode" },
+		}
+
+		dap.configurations.cs = {
+			{
+				type = "coreclr",
+				name = "launch - netcoredbg",
+				request = "launch",
+				program = function()
+					if vim.fn.confirm("Rebuild first?", "&yes\n&no", 2) == 1 then
+						dotnet_build_project()
+					end
+
+					return dotnet_get_dll_path()
+				end,
+			},
+		}
+
+		dap.listeners.before.attach.dapui_config = function()
+			dapui.open()
+		end
+		dap.listeners.before.launch.dapui_config = function()
+			dapui.open()
+		end
+		dap.listeners.before.event_terminated.dapui_config = function()
+			dapui.close()
+		end
+		dap.listeners.before.event_exited.dapui_config = function()
+			dapui.close()
+		end
+
+		vim.keymap.set("n", "<Leader>db", dap.toggle_breakpoint, { desc = "Toggle breakpoint" })
+		vim.keymap.set("n", "<Leader>dca", dap.clear_breakpoints, { desc = "Clear all breakpoints" })
+		vim.keymap.set("n", "<Leader>dla", dap.list_breakpoints, { desc = "List all breakpoints" })
+		vim.keymap.set("n", "<F10>", function()
+			require("dap").step_over()
+		end)
+		vim.keymap.set("n", "si", function()
+			require("dap").step_into()
+		end)
+		vim.keymap.set("n", "<F12>", function()
+			require("dap").step_out()
+		end)
+
+		local continue = function()
+			local cwd = vim.fn.getcwd()
+			print(cwd .. "/.vscode/launch.json")
+			local path = cwd .. "\\.vscode\\launch.json"
+			print(path)
+			if vim.fn.filereadable(path) then -- Use the path variable we created above
+				require("dap.ext.vscode").load_launchjs()
+			end
+			dap.continue()
+		end
+		vim.keymap.set("n", "<Leader>dc", continue, { desc = "Continue" })
+	end,
+}
