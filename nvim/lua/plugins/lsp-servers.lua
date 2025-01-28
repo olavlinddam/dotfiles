@@ -11,9 +11,30 @@ return {
             })
         end,
     },
+    -- Mason LSP config bridge
+    {
+        "williamboman/mason-lspconfig.nvim",
+        config = function()
+            require("mason-lspconfig").setup({
+                ensure_installed = {
+                    "lua_ls",    
+                }
+            })
+        end,
+    },
     -- LSP Configuration
     {
         "neovim/nvim-lspconfig",
+        config = function()
+            local lspconfig = require('lspconfig')
+            
+            -- Lua LSP configuration
+            lspconfig.lua_ls.setup({
+                capabilities = require('cmp_nvim_lsp').default_capabilities(),
+            })
+            
+            -- You can add more LSP configs here as needed
+        end,
     },
     -- Roslyn LSP for C#
     {

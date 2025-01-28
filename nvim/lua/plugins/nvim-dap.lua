@@ -97,11 +97,8 @@ return {
 		local function get_debugger_path()
 			if uname == "Windows_NT" then
 				return "C:\\Users\\olav\\scoop\\shims\\netcoredbg"
-			elseif uname == "Linux" or uname == "Darwin" then
+			else 
 				return "/usr/local/netcoredbg"
-			else
-				print("Unsupported operating system")
-				return nil
 			end
 		end
 
@@ -150,7 +147,7 @@ return {
 
 		dap.adapters.coreclr = {
 			type = "executable",
-			command = "C:\\Users\\olav\\scoop\\shims\\netcoredbg.exe",
+			command = get_debugger_path(),
 			args = { "--interpreter=vscode" },
 		}
 

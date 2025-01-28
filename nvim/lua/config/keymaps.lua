@@ -32,20 +32,6 @@ map('n', '<leader>QQ', ':q!<CR>', { desc = 'Force quit' })
 map('n', '<leader>qa', ':qa<CR>', { desc = 'Quit all' })
 map('n', '<leader>QA', ':qa!<CR>', { desc = 'Quit all' })
 
--- Telescope keymaps (lazy loaded)
-vim.api.nvim_create_autocmd("User", {
-    pattern = "LazyLoad",
-    callback = function(ev)
-        if ev.data == "telescope.nvim" then
-            local telescope = require('telescope.builtin')
-            map('n', '<leader>ff', telescope.find_files, { desc = 'Find files' })
-            map('n', '<leader>fg', telescope.live_grep, { desc = 'Live grep' })
-            map('n', '<leader>fb', telescope.buffers, { desc = 'Buffers' })
-            map('n', '<leader>fh', telescope.help_tags, { desc = 'Help tags' })
-        end
-    end,
-})
-
 -- File explorer
 map('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = 'Toggle file explorer' })
 map('n', '<leader>E', ':NvimTreeFocus<CR>', { desc = 'Focus file explorer' })
