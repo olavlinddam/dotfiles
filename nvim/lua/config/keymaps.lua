@@ -1,3 +1,4 @@
+-- stylua: ignore
 local function map(mode, lhs, rhs, opts)
     local options = { noremap = true }
     if opts then
@@ -10,6 +11,16 @@ end
 map('i', 'jk', '<Esc>', { desc = 'Exit insert mode' })
 map('n', '<Esc>', ':noh<CR><Esc>', { desc = 'Clear search highlighting' })
 
+-- Buffers
+map('n', '<leader>bw', ':w<CR>', { desc = '[B]uffer write' })
+map('n', '<leader>bwq', ':wq<CR>', { desc = '[B]uffer write and quit' })
+map('n', '<leader>bq', ':q<CR>', { desc = '[B]uffer quit' })
+map('n', '<leader>bwa', ':wa<CR>', { desc = '[B]uffer write all' })
+map('n', '<leader>bfq', ':q!<CR>', { desc = '[B]uffer force quit' })
+map('n', '<leader>bqa', ':qa<CR>', { desc = '[B]uffer quit all' })
+map('n', '<leader>bfqa', ':qa!<CR>', { desc = '[B]uffer force quit all' })
+map('n', '<leader>bl', ':e#<CR>', { noremap = true, silent = true, desc = 'Jump to last buffer' })
+
 -- Line navigation
 map('n', 'j', 'gj', { desc = 'Move down by visual line' })
 map('n', 'k', 'gk', { desc = 'Move up by visual line' })
@@ -20,25 +31,53 @@ map('v', 'k', 'gk', { desc = 'Move up by visual line' })
 map('v', 'H', '^', { desc = 'Go to start of line' })
 map('v', 'L', '$', { desc = 'Go to end of line' })
 
+
 -- Jumplist
-map('n', 'gb', '<C-o>', { desc = 'Go back in jumplist' })
-map('n', 'gf', '<C-i>', { desc = 'Go forward in jumplist' })
+map('n', 'jb', '<C-o>', { desc = '[j]umplist [b]ack' })
+map('n', 'jf', '<C-i>', { desc = '[j]umplist [f]orward' })
+
+-- Which Key 
+-- This will be conditionally loaded when which-key plugin is available
+vim.api.nvim_create_autocmd("User", {
+    pattern = "LazyLoad",
+    callback = function(ev)
+        if ev.data == "which-key.nvim" then
+            -- Show buffer local keymaps
+            map('n', '<leader>?', function()
+                require("which-key").show({ global = false })
+            end, { desc = 'Buffer Local Keymaps (which-key)' })
+
+            -- Show all keymaps
+            map('n', '<leader>wk', function()
+                require("which-key").show({ global = true })
+            end, { desc = 'Show All Keymaps' })
+        end
+    end,
+})
+
+-- Persistence
+vim.api.nvim_create_autocmd("User", {
+    pattern = "LazyLoad",
+    callback = function(ev)
+        if ev.data == "persistence.nvim" then
+            map('n', '<leader>qs', function() require("persistence").load() end, { desc = 'Restore Session' })
+            map('n', '<leader>qS', function() require("persistence").select() end, { desc = 'Select Session' })
+            map('n', '<leader>ql', function() require("persistence").load({ last = true }) end, { desc = 'Restore Last Session' })
+            map('n', '<leader>qd', function() require("persistence").stop() end, { desc = "Don't Save Current Session" })
+        end
+    end,
+})
 
 -- System clipboard integration
-map('n', '<leader>y', '"+y', { desc = 'Yank to system clipboard' })
-map('v', '<leader>y', '"+y', { desc = 'Yank selection to system clipboard' })
-map('n', '<leader>Y', '"+Y', { desc = 'Yank line to system clipboard' })
-map('n', '<leader>p', '"+p', { desc = 'Paste from system clipboard' })
-map('n', '<leader>P', '"+P', { desc = 'Paste from system clipboard before cursor' })
+map('n', '<leader>y', '"+y', { desc = '[y]ank to system clipboard' })
+map('v', '<leader>y', '"+y', { desc = '[Y]ank selection to system clipboard in visual mode' })
+map('n', '<leader>Y', '"+Y', { desc = '[Y]ank line to system clipboard' })
+map('n', '<leader>p', '"+p', { desc = '[p]aste from system clipboard' })
+map('n', '<leader>P', '"+P', { desc = '[P]aste from system clipboard before cursor' })
+map('v', '<leader>p', '"+p', { desc = '[p]aste from system clipboard in visual mode' })
+map('v', '<leader>P', '"+P', { desc = '[P]aste from system clipboard before cursor in visual mode' })
 
--- Write and quit
-map('n', '<leader>ww', ':w<CR>', { desc = 'Write buffer' })
-map('n', '<leader>wq', ':wq<CR>', { desc = 'Write buffer and quit' })
-map('n', '<leader>qq', ':q<CR>', { desc = 'Quit' })
-map('n', '<leader>wa', ':wa<CR>', { desc = 'Write all buffers' })
-map('n', '<leader>QQ', ':q!<CR>', { desc = 'Force quit' })
-map('n', '<leader>qa', ':qa<CR>', { desc = 'Quit all' })
-map('n', '<leader>QA', ':qa!<CR>', { desc = 'Quit all' })
+
 
 -- Telescope keymaps (lazy loaded)
 vim.api.nvim_create_autocmd("User", {
@@ -86,8 +125,6 @@ vim.api.nvim_create_autocmd("User", {
 })
 
 
--- Buffers
-map('n', '<leader>bl', ':e#<CR>', { noremap = true, silent = true, desc = 'Jump to last buffer' })
 
 -- File explorer
 map('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = 'Toggle file explorer' })
@@ -121,15 +158,30 @@ map('n', 'he', vim.diagnostic.open_float, { desc = 'Show error description' })
 
 
 -- Error navigation
-map('n', '<leader>ne', vim.diagnostic.goto_next, { desc = 'Go to next error' })
-map('n', '<leader>pe', vim.diagnostic.goto_prev, { desc = 'Go to previous error' })
-map('n', '<leader>hq', vim.diagnostic.setloclist, { desc = 'Open diagnostic quickfix list' })
+map('n', '<leader>dn', vim.diagnostic.goto_next, { desc = '[d]iagnostic [n]ext' })
+map('n', '<leader>dp', vim.diagnostic.goto_prev, { desc = '[d]iagnostic [p]revious' })
+map('n', '<leader>dq', vim.diagnostic.setloclist, { desc = '[d]iagnostic [q]uicklist' })
 
 -- Code actions
-map('n', '<leader>rn', vim.lsp.buf.rename, { desc = 'Rename symbol' })
-map('n', '<leader>ca', vim.lsp.buf.code_action, { desc = 'Code actions' })
-map('n', '<leader>fd', vim.lsp.buf.format, { desc = 'Format code' })
-map('n', '<leader>fi', vim.lsp.buf.format, { desc = 'Format and organize imports' })
+map('n', '<leader>rn', vim.lsp.buf.rename, { desc = '[r]e[n]ame symbol' })
+map('n', '<leader>ca', vim.lsp.buf.code_action, { desc = '[c]ode [a]ctions' })
+map('n', '<leader>fd', vim.lsp.buf.format, { desc = '[f]ormat [d]ocument' })
+map('n', '<leader>fi', vim.lsp.buf.format, { desc = '[f]ormat [i]mports' })
+    --
+-- Git 
+-- Neogit
+map('n', '<leader>gg', function() require('neogit').open() end, { desc = 'Open Neogit' })
+map('n', '<leader>gc', function() require('neogit').open({"commit"}) end, { desc = 'Neogit commit' })
+map('n', '<leader>gp', function() require('neogit').open({"pull"}) end, { desc = 'Neogit pull' })
+map('n', '<leader>gP', function() require('neogit').open({"push"}) end, { desc = 'Neogit push' })
+map('n', '<leader>gb', function() require('neogit').open({"branch"}) end, { desc = 'Neogit branch' })
+map('n', '<leader>gl', function() require('neogit').open({"log"}) end, { desc = 'Neogit log' })
+
+-- DiffView
+map('n', '<leader>gdo', '<cmd>DiffviewOpen<cr>', { desc = 'Open DiffView' })
+map('n', '<leader>gdc', '<cmd>DiffviewClose<cr>', { desc = 'Close DiffView' })
+map('n', '<leader>gfh', '<cmd>DiffviewFileHistory %<cr>', { desc = 'File History (current file)' })
+map('n', '<leader>gph', '<cmd>DiffviewFileHistory<cr>', { desc = 'File History (project)' })
 
 -- Indentation
 map('n', '<Tab>', '>>_', { desc = 'Indent line' })
@@ -148,5 +200,4 @@ map('n', '<leader>dB', function() require('dap').set_breakpoint(vim.fn.input('Br
     { desc = 'Set conditional breakpoint' })
 map('n', '<leader>dr', function() require('dap').repl.open() end, { desc = 'Open debug REPL' })
 map('n', '<leader>dl', function() require('dap').run_last() end, { desc = 'Run last debug configuration' })
-
 
