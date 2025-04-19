@@ -1,0 +1,143 @@
+let mapleader=" "
+set multicursor
+set easymotion
+set relativenumber
+set scrolloff=10
+set showmode
+set showcmd
+set ignorecase
+set visualbell
+set smartcase
+set nerdtree
+Plug 'tpope/vim-surround'
+
+" Performance settings
+set clipboard+=unnamed " Use IDE's clipboard instead of system's clipboard
+set timeout           " Enable timeout for mappings
+set timeoutlen=300    " Reduce timeout length for mappings
+set ttimeout          " Enable timeout for key codes
+set ttimeoutlen=10    " Reduce timeout length for key codes
+
+" Basic mappings
+inoremap jk <Esc>
+
+""""""" Search """""""""
+"Clear search highlighting with ESC
+set incsearch
+set hlsearch
+nnoremap <esc> :noh<return><esc> 
+
+
+" Window management
+map <leader>mr <Action>(MoveTabRight)
+map <leader>mtl <Action>(MoveTabLeft)
+map <leader>mtd <Action>(MoveTabDown)
+
+" System clipboard integration (faster implementation)
+set clipboard+=unnamed
+" map black hole register
+noremap \ "_  
+xnoremap p P  
+
+"nmap <leader>y "+y
+"nmap <leader>Y "+Y
+"nmap <leader>p "+p
+"nmap <leader>P "+P
+"vmap <leader>y "+y
+"vmap <leader>Y "+Y
+"vmap <leader>p "+p
+"vmap <leader>P "+P
+
+" Document formatting
+map <leader>fd <Action>(ReformatCode)
+map <leader>fi <Action>(OptimizeImports)
+map <leader>fc <Action>(ShowReformatFileDialog)
+
+" File explorer
+map <leader>e :NERDTreeToggle<CR>
+map <C-S-t> <Action>(ActivateUnitTestsToolWindow)
+map <C-S-a> <Action>(NewElement)
+map <leader>de <Action>(ActivateDatabaseToolWindow)
+
+
+" Code actions
+map <leader>cl <action>(CommentByLineComment)
+map <leader>rn <Action>(RenameElement)
+map <leader>qq <action>(CloseContent)
+map <leader>ca <action>(ShowContextActions)
+map <leader>qa <action>(HideAllWindows)
+map <leader>sw <action>(SurroundWith)
+
+" GIT
+map <leader>gc <action>(CheckinProject)
+map <leader>gp <action>(Vcs.Push)
+map <leader>gl <action>(ActivateVersionControlToolWindow) 
+map <leader>gB <action>(GitToolBox.ShowInlineBlame) 
+map <leader>gb <action>(Git.Branches) 
+
+" Code navigation
+nmap gd <Action>(GotoDeclaration)
+nmap fs <Action>(FileStructurePopup)
+nmap gy <Action>(GotoTypeDeclaration)
+nmap gi <Action>(ReSharperGotoImplementation)
+nmap td <Action>(QuickImplementations)
+nmap gr <Action>(ShowUsages)
+nmap gt <Action>(GotoTest)
+nmap gm <Action>(GotoSuperMethod)
+nmap gb <Action>(Back)
+nmap gf <Action>(Forward)
+
+map <leader>tl <Action>(NextTab)
+map <leader>th <Action>(PreviousTab)
+
+" Method and error navigation
+nmap <leader>nm <Action>(MethodDown)
+nmap <leader>pm <Action>(MethodUp)
+nmap <leader>ne <Action>(GotoNextError)
+nmap <leader>nse <Action>(ReSharperGotoNextErrorInSolution)
+nmap <leader>pe <Action>(GotoPreviousError)
+
+" Pickers
+nmap <leader>se <Action>(SearchEverywhere)
+map <leader>sf <Action>(GotoFile)
+map <leader>ss <Action>(GotoSymbol)
+map <leader>sb <Action>(RecentFiles)
+map <leader>sc <Action>(RecentChanges)
+map <leader>srb <Action>(GitToolBox.SwitchRecentBranches)
+map <leader>sl <Action>(RecentLocations)
+map <leader>sg <Action>(TextSearchAction)
+map <leader>sa <Action>(GotoAction)
+
+" Harpoon
+map <leader>hs <Action>(ShowHarpoon)
+map <leader>ha <Action>(AddToHarpoon)
+map <leader>1 <Action>(GotoHarpoon1)
+map <leader>2 <Action>(GotoHarpoon2)
+map <leader>3 <Action>(GotoHarpoon3)
+map <leader>4 <Action>(GotoHarpoon4)
+map <leader>5 <Action>(GotoHarpoon5) 
+
+" Indentation
+nnoremap <Tab> >>_
+nnoremap <S-Tab> <<_
+inoremap <S-Tab> <C-D>
+vnoremap <Tab> >gv
+vnoremap <S-Tab> <gv
+
+" Documentation and errors
+map <leader>hd <action>(QuickJavaDoc)
+map <leader>he <action>(ShowErrorDescription)
+map <leader>ca <action>(ShowIntentionActions)
+
+" Navigation
+nnoremap H ^
+nnoremap L $
+
+
+
+
+" Debugging/Run
+map <leader>db <action>(ToggleLineBreakpoint)
+map <leader>rui <action>(ActivateRunToolWindow)
+map <leader>dui <action>(ActivateDebugToolWindow)
+
